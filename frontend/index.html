@@ -3,14 +3,167 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Currículums</title>
+    <title>Sistema de Gestión de Currículums</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        main {
+            max-width: 800px;
+            margin: 2rem auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h3 {
+            color: #4CAF50;
+        }
+
+        form {
+            margin-bottom: 2rem;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input[type="file"], input[type="text"] {
+            margin: 1rem 0;
+            padding: 0.5rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #file-list {
+            margin-top: 2rem;
+        }
+
+        a {
+            color: #4CAF50;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 2rem;
+            color: #777;
+        }
+
+        .file-item {
+            margin: 0.5rem 0;
+        }
+    </style>
 </head>
 <body>
-    <h3>Sistema de Currículums</h3>
-    <form action="/upload" method="post" enctype="multipart/form-data">
-        <label for="file">Subir Currículum (PDF):</label>
-        <input type="file" id="file" name="file" accept=".pdf" required>
-        <button type="submit">Subir</button>
-    </form>
+    <header>
+        <h1>Sistema de Gestión de Currículums</h1>
+    </header>
+    <main>
+        <h3>Subir Currículum</h3>
+        <form id="upload-form">
+            <label for="file">Selecciona un archivo (PDF):</label>
+            <input type="file" id="file" name="file" accept=".pdf" required>
+            <button type="submit">Subir</button>
+        </form>
+
+        <h3>Buscar Currículums</h3>
+        <input type="text" id="search-bar" placeholder="Buscar por nombre de archivo...">
+
+        <h3>Lista de Currículums Subidos</h3>
+        <div id="file-list">
+            <!-- Aquí se cargará la lista de archivos -->
+        </div>
+    </main>
+    <footer>
+        <p>&copy; 2025 Sistema de Gestión de Currículums</p>
+    </footer>
+
+    <script>
+        // Cargar la lista de archivos al cargar la página
+        function loadFileList() {
+            fetch('/list')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('file-list').innerHTML = data;
+                    addSearchFunctionality();
+                })
+                .catch(error => console.error('Error al cargar la lista de archivos:', error));
+        }
+
+        // Subir archivo sin recargar la página
+        document.getElementById('upload-form').addEventListener('submit', function (event) {
+            event.preventDefault(); // Evita la recarga de la página
+
+            const formData = new FormData();
+            const fileInput = document.getElementById('file');
+            formData.append('file', fileInput.files[0]);
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.text())
+                .then(data => {
+                    alert(data); // Muestra un mensaje de éxito o error
+                    fileInput.value = ''; // Limpia el campo de archivo
+                    loadFileList(); // Recarga la lista de archivos
+                })
+                .catch(error => console.error('Error al subir el archivo:', error));
+        });
+
+        // Agregar funcionalidad de búsqueda
+function addSearchFunctionality() {
+    const searchBar = document.getElementById('search-bar');
+    const fileItems = document.querySelectorAll('.file-item');
+
+    searchBar.addEventListener('input', () => {
+        const searchTerm = searchBar.value.toLowerCase();
+
+        fileItems.forEach(item => {
+            const fileName = item.textContent.toLowerCase();
+            if (fileName.includes(searchTerm)) {
+                item.style.display = ''; // Mostrar el elemento
+            } else {
+                item.style.display = 'none'; // Ocultar el elemento
+            }
+        });
+    });
+}
+
+        // Cargar la lista de archivos al inicio
+        loadFileList();
+    </script>
 </body>
 </html>
